@@ -1,0 +1,18 @@
+{
+  "appId": "com.neilzhao.worddict",
+  "appName": "Word Dictation",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "http"
+  },
+  "android": {
+    "allowCleartextTraffic": true
+  },
+  "plugins": {
+    "Camera": {
+      "permissions": {
+        "camera": "Take photos of the word list and answers for on-device recognition"
+      }
+    }
+  }
+}

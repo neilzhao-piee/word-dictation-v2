@@ -1,0 +1,19 @@
+[Unit]
+Description=OCR relay for Word Dictation (Azure AI Vision Read, ADR-0010)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Key lives in this env file only (root 0600), never in the repo/APK.
+EnvironmentFile=/etc/wd-ocr.env
+ExecStart=/usr/bin/python3 /opt/wd-ocr/ocr-relay.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/wd-ocr
+
+[Install]
+WantedBy=multi-user.target

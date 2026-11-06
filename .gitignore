@@ -1,0 +1,25 @@
+# dependencies / build output
+node_modules/
+android/
+ios/
+www/assets/build/
+
+# private: local issue specs, generated docs, release artifacts, credentials
+.scratch/
+docs/manual-zh.pdf
+*.apk
+*.aab
+*.jks
+*.keystore
+.env
+*.env
+!scripts/*.env.example
+
+# local relay config if you prefer a separate file over relay-config.js
+www/js/relay-config.local.js
+
+# OS / editor / python junk
+*.log
+.DS_Store
+__pycache__/
+*.pyc

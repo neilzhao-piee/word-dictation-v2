@@ -1,0 +1,26 @@
+{
+  "name": "word-dictation-v2",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Local-first English dictation app for families (Capacitor). On-device recognition by default, optional self-hosted OCR relay.",
+  "scripts": {
+    "test": "node tests/grade.test.mjs && node tests/ocr.test.mjs && node tests/storage.test.mjs",
+    "sync": "npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^8.0.2",
+    "@capacitor-mlkit/text-recognition": "^8.2.2",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/camera": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.4"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.7"
+  }
+}

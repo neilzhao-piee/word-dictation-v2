@@ -1,0 +1,161 @@
+/* Word Dictation v2 — mobile-first, offline. Large tap targets, one column. */
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --ink: #1c2733;
+  --muted: #5f6b76;
+  --accent: #1a7f5c;
+  --accent-ink: #ffffff;
+  --danger: #b3362c;
+  --line: #d8dee4;
+  --chip: #eef2f5;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* edge-to-edge: push the bar's content below the system status bar */
+  padding: calc(12px + max(var(--statusbar-h, 0px), env(safe-area-inset-top, 0px))) 16px 10px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand { font-weight: 700; font-size: 18px; }
+
+nav.tabs { display: flex; gap: 8px; }
+nav.tabs a {
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 15px;
+}
+nav.tabs a.active { color: var(--accent); background: var(--chip); }
+
+main { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+h1 { font-size: 22px; margin: 0 0 6px; }
+h2 { font-size: 18px; margin: 0 0 10px; }
+.muted { color: var(--muted); font-size: 14px; }
+
+.btn {
+  display: inline-block;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 48px;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.big { width: 100%; padding: 18px; font-size: 18px; }
+
+.grid { display: grid; gap: 10px; }
+.grid.two { grid-template-columns: 1fr 1fr; }
+
+.word-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--chip);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+.chip input {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  width: 11ch;
+  color: var(--ink);
+}
+.chip .x { border: 0; background: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 2px 6px; }
+
+.word-card {
+  text-align: center;
+  padding: 40px 16px;
+}
+.word-card .word { font-size: 34px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; user-select: none; }
+.progress-line { font-size: 15px; color: var(--muted); margin-bottom: 8px; }
+
+.score { font-size: 30px; font-weight: 700; color: var(--accent); }
+.mistake-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mistake-row .given { color: var(--danger); font-weight: 600; }
+
+.week {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.form-row { display: flex; gap: 8px; margin: 10px 0; }
+.form-row input[type="text"],
+.form-row input[type="password"] {
+  flex: 1;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+}
+select {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  font: inherit;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.notice { color: var(--danger); font-size: 14px; margin: 8px 0; }
+.photo-preview { margin: 10px 0; }
+.photo-preview img { max-width: 100%; max-height: 320px; border-radius: 12px; border: 1px solid var(--line); }
+.notice.ok { color: var(--accent); }
+
+.footnote { text-align: center; color: var(--muted); font-size: 13px; padding: 18px 0 calc(30px + env(safe-area-inset-bottom, 0px)); }
+
+@media (max-width: 480px) {
+  .grid.two { grid-template-columns: 1fr; }
+  h1 { font-size: 20px; }
+}
