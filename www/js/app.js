@@ -21,6 +21,18 @@
   }
   function applyI18n(root) { window.I18N.applyToDOM(root); }
 
+  // Dictation order: same word set, either in list order or shuffled.
+  // The saved list keeps the parent's order; only the reading order changes.
+  function shuffle(list) {
+    const a = list.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+
   // ISO week label (Monday start) in the configured timezone.
   function isoWeekLabel(ts, timeZone) {
     const d = new Date(ts);
@@ -42,13 +54,14 @@
   const RELAY_CONFIG = (typeof window.WD_RELAY === 'object' && window.WD_RELAY) || {};
 
   async function getSettings() {
-    const [lang, voice, tz, ocrCloud, ocrCloudUrl, ocrCloudToken] = await Promise.all([
+    const [lang, voice, tz, ocrCloud, ocrCloudUrl, ocrCloudToken, dictationOrder] = await Promise.all([
       window.Storage.getSetting('language'),
       window.Storage.getSetting('voiceVariant'),
       window.Storage.getSetting('timezone'),
       window.Storage.getSetting('ocrCloud'),
       window.Storage.getSetting('ocrCloudUrl'),
       window.Storage.getSetting('ocrCloudToken'),
+      window.Storage.getSetting('dictationOrder'),
     ]);
     return {
       language: lang ? lang.value : null,
@@ -57,6 +70,7 @@
       ocrCloud: ocrCloud ? String(ocrCloud.value) !== 'off' : true,
       ocrCloudUrl: String((ocrCloudUrl && ocrCloudUrl.value) || RELAY_CONFIG.url || '').trim(),
       ocrCloudToken: String((ocrCloudToken && ocrCloudToken.value) || RELAY_CONFIG.token || '').trim(),
+      dictationOrder: dictationOrder && dictationOrder.value === 'seq' ? 'seq' : 'random',
     };
   }
 
@@ -85,7 +99,7 @@
   }
 
   // ---- working dictation state (in memory, persisted on finish) ----
-  let draft = null; // { words: string[], index: number, listId }
+  let draft = null; // { words, order, index, listId, orderMode } — words keeps the parent's order
 
   // ============ views ============
 
@@ -162,6 +176,7 @@
   }
 
   async function viewNew() {
+    const settings = await getSettings();
     const v = el('<div>' +
       '<div class="card"><h1 data-i18n="new.title"></h1>' +
       '<p class="muted" data-i18n="new.step1"></p>' +
@@ -175,9 +190,33 @@
       '<p class="muted" data-i18n="new.manualHint"></p>' +
       '</div>' +
       '<div class="card"><p class="muted" data-i18n="new.confirmWords"></p>' +
+      '<fieldset class="order-mode">' +
+      '<legend data-i18n="new.orderTitle"></legend>' +
+      '<div class="order-opts">' +
+      '<label class="order-opt"><input type="radio" name="orderMode" value="random"><span data-i18n="new.orderRandom"></span></label>' +
+      '<label class="order-opt"><input type="radio" name="orderMode" value="seq"><span data-i18n="new.orderSeq"></span></label>' +
+      '</div>' +
+      '<p class="muted" id="orderHint"></p>' +
+      '</fieldset>' +
       '<button class="btn primary big" id="startBtn" data-i18n="new.startDictation"></button></div>' +
       '</div>');
     applyI18n(v);
+
+    // Order choice is remembered on this device so a parent only picks it once.
+    const orderInputs = Array.prototype.slice.call(v.querySelectorAll('input[name="orderMode"]'));
+    const orderHint = v.querySelector('#orderHint');
+    orderInputs.forEach(function (i) { i.checked = i.value === settings.dictationOrder; });
+    function readOrder() {
+      const picked = orderInputs.filter(function (i) { return i.checked; })[0] || orderInputs[0];
+      return picked.value;
+    }
+    function syncOrderUi() {
+      const mode = readOrder();
+      orderInputs.forEach(function (i) { i.closest('.order-opt').classList.toggle('on', i.checked); });
+      orderHint.textContent = t(mode === 'seq' ? 'new.orderSeqHint' : 'new.orderRandomHint');
+    }
+    orderInputs.forEach(function (i) { i.addEventListener('change', syncOrderUi); });
+    syncOrderUi();
 
     const words = draft ? draft.words.slice() : [];
     const chipsBox = v.querySelector('#chips');
@@ -243,7 +282,10 @@
         return;
       }
       const list = await window.Storage.saveList({ words: confirmed, source: 'manual' });
-      draft = { words: confirmed, index: 0, listId: list.id };
+      const mode = readOrder();
+      await window.Storage.setSetting('dictationOrder', mode);
+      const order = mode === 'random' ? shuffle(confirmed) : confirmed.slice();
+      draft = { words: confirmed, order: order, index: 0, listId: list.id, orderMode: mode };
       location.hash = '#/dict';
     });
 
@@ -251,14 +293,18 @@
   }
 
   async function viewDict() {
-    if (!draft || draft.index >= draft.words.length) {
-      location.hash = draft ? '#/check' : '#/new';
+    if (!draft) { location.hash = '#/new'; return el('<div></div>'); }
+    // `order` is the reading order (random or list order); `words` keeps the
+    // parent's order for grading and history records.
+    const order = draft.order && draft.order.length ? draft.order : draft.words;
+    if (draft.index >= order.length) {
+      location.hash = '#/check';
       return el('<div></div>');
     }
     const settings = await getSettings();
-    const word = draft.words[draft.index];
+    const word = order[draft.index];
     const v = el('<div><div class="card word-card">' +
-      '<p class="progress-line">' + esc(t('dict.progress', { done: Math.min(draft.index + 1, draft.words.length), total: draft.words.length })) + '</p>' +
+      '<p class="progress-line">' + esc(t('dict.progress', { done: Math.min(draft.index + 1, order.length), total: order.length })) + '</p>' +
       '<div class="word">' + esc(word) + '</div>' +
       '</div>' +
       '<div class="grid">' +
@@ -285,7 +331,7 @@
       if (skipped) draft.skipped = draft.skipped || [];
       if (skipped) draft.skipped.push(word);
       draft.index += 1;
-      go(draft.index >= draft.words.length ? '#/check' : '#/dict');
+      go(draft.index >= order.length ? '#/check' : '#/dict');
     }
     v.querySelector('#next').addEventListener('click', function () { advance(false); });
     v.querySelector('#skip').addEventListener('click', function () { advance(true); });

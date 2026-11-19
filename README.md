@@ -12,7 +12,7 @@ Capacitor 壳 + 纯 JS（无构建步骤），**本地优先**：发音、批改
 
 ## 快速开始
 
-不想自己编译：直接下 [Releases](https://github.com/neilzhao-piee/word-dictation-v2/releases) 里的 `word-dictation-v0.1.0-debug.apk`（debug 签名，仅试用；**默认只用手机本机识别**，包内不含任何中继地址或令牌）。
+不想自己编译：直接下 [Releases](https://github.com/neilzhao-piee/word-dictation-v2/releases) 里的 `word-dictation-v0.2.0-debug.apk`（debug 签名，仅试用；**默认只用手机本机识别**，包内不含任何中继地址或令牌）。听写顺序可选“随机”或“按顺序”。
 
 网页预览（看流程用；相机、原生 TTS、ML Kit 在浏览器里不可用）：
 

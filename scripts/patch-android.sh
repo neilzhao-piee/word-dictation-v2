@@ -50,3 +50,17 @@ else
   grep -n 'localeConfig' "$MANIFEST"
   echo "patched localeConfig in $MANIFEST"
 fi
+
+# --- app version (v0.1.0 shipped with versionCode 1) ---
+# Bump here, not only in the generated file, so `npx cap add android` keeps it.
+GRADLE="$ROOT/android/app/build.gradle"
+if grep -q 'versionCode 2$' "$GRADLE"; then
+  echo "already patched: $GRADLE"
+else
+  sed -i \
+    -e 's/versionCode 1$/versionCode 2/' \
+    -e 's/versionName "1\.0"/versionName "0.2.0"/' \
+    "$GRADLE"
+  grep -n 'versionCode\|versionName' "$GRADLE"
+  echo "patched versionCode/versionName in $GRADLE"
+fi

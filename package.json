@@ -1,6 +1,6 @@
 {
   "name": "word-dictation-v2",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "description": "Local-first English dictation app for families (Capacitor). On-device recognition by default, optional self-hosted OCR relay.",
